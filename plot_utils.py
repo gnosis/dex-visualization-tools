@@ -243,90 +243,95 @@ def plot_orderbook(t1: str,
     _xS2 = cumulated_sell_amounts[t2]
     _xB2 = cumulated_buy_amounts[t2]
 
-    xrate_hovers = ["rate: %.4f %s/%s" % (xrates[i], t1, t2) for i in range(len(xrates))]
+    _idx = range(len(xrates))
+    xrate_hovers = ["rate: %.4f %s/%s" % (xrates[i], t1, t2) for i in _idx]
 
     # Create traces for order amounts and plot.
-    trace_xS1 = go.Scatter(x=xrates,
-                           y=_xS1,
-                           name="sell %s" % t1,
-                           showlegend=False,
-                           hovertext=[xrate_hovers[i] + "<br>amount: %.4f %s"
-                                      % (_xS1[i], t1) for i in range(len(xrates))],
-                           hoverinfo='text+name',
-                           fill=None,
-                           mode='lines',
-                           line={'color': C0, 'width': 1})
+    trace_xS1 = go.Scatter(
+        x=xrates,
+        y=_xS1,
+        name="sell %s" % t1,
+        showlegend=False,
+        hovertext=[xrate_hovers[i] + "<br>amount: %.4f %s" % (_xS1[i], t1) for i in _idx],
+        hoverinfo='text+name',
+        fill=None,
+        mode='lines',
+        line={'color': C0, 'width': 1})
 
-    trace_xB1 = go.Scatter(x=xrates,
-                           y=_xB1,
-                           name="buy %s" % t1,
-                           showlegend=False,
-                           hovertext=[xrate_hovers[i] + "<br>amount: %.4f %s"
-                                      % (_xB1[i], t1) for i in range(len(xrates))],
-                           hoverinfo='text+name',
-                           fill=None,
-                           mode='lines',
-                           line={'color': C1, 'width': 1})
+    trace_xB1 = go.Scatter(
+        x=xrates,
+        y=_xB1,
+        name="buy %s" % t1,
+        showlegend=False,
+        hovertext=[xrate_hovers[i] + "<br>amount: %.4f %s" % (_xB1[i], t1) for i in _idx],
+        hoverinfo='text+name',
+        fill=None,
+        mode='lines',
+        line={'color': C1, 'width': 1})
 
-    trace_x1_min = go.Scatter(x=xrates,
-                              y=np.minimum(_xS1, _xB1),
-                              showlegend=False,
-                              hoverinfo='skip',
-                              fill='tozeroy',
-                              mode='lines',
-                              line={'color': '#bfbfbf', 'width': 0})
+    trace_x1_min = go.Scatter(
+        x=xrates,
+        y=np.minimum(_xS1, _xB1),
+        showlegend=False,
+        hoverinfo='skip',
+        fill='tozeroy',
+        mode='lines',
+        line={'color': '#bfbfbf', 'width': 0})
 
-    trace_xS2 = go.Scatter(x=xrates,
-                           y=_xS2,
-                           name="sell %s" % t2,
-                           showlegend=False,
-                           hovertext=[xrate_hovers[i] + "<br>amount: %.4f %s"
-                                      % (_xS2[i], t2) for i in range(len(xrates))],
-                           hoverinfo='text+name',
-                           fill=None,
-                           mode='lines',
-                           line={'color': C1, 'width': 1})
+    trace_xS2 = go.Scatter(
+        x=xrates,
+        y=_xS2,
+        name="sell %s" % t2,
+        showlegend=False,
+        hovertext=[xrate_hovers[i] + "<br>amount: %.4f %s" % (_xS2[i], t2) for i in _idx],
+        hoverinfo='text+name',
+        fill=None,
+        mode='lines',
+        line={'color': C1, 'width': 1})
 
-    trace_xB2 = go.Scatter(x=xrates,
-                           y=_xB2,
-                           name="buy %s" % t2,
-                           showlegend=False,
-                           hovertext=[xrate_hovers[i] + "<br>amount: %.4f %s"
-                                      % (_xB2[i], t2) for i in range(len(xrates))],
-                           hoverinfo='text+name',
-                           fill=None,
-                           mode='lines',
-                           line={'color': C0, 'width': 1})
+    trace_xB2 = go.Scatter(
+        x=xrates,
+        y=_xB2,
+        name="buy %s" % t2,
+        showlegend=False,
+        hovertext=[xrate_hovers[i] + "<br>amount: %.4f %s" % (_xB2[i], t2) for i in _idx],
+        hoverinfo='text+name',
+        fill=None,
+        mode='lines',
+        line={'color': C0, 'width': 1})
 
-    trace_x2_min = go.Scatter(x=xrates,
-                              y=np.minimum(_xS2, _xB2),
-                              showlegend=False,
-                              hoverinfo='skip',
-                              fill='tozeroy',
-                              mode='lines',
-                              line={'color': '#bfbfbf', 'width': 0})
+    trace_x2_min = go.Scatter(
+        x=xrates,
+        y=np.minimum(_xS2, _xB2),
+        showlegend=False,
+        hoverinfo='skip',
+        fill='tozeroy',
+        mode='lines',
+        line={'color': '#bfbfbf', 'width': 0})
 
-    trace_x1_net = go.Scatter(x=xrates,
-                              y=_xS1 - _xB1,
-                              name="net %s" % t1,
-                              showlegend=False,
-                              hovertext=[xrate_hovers[i] + "<br>amount: %.4f %s"
-                                         % (_xS1[i] - _xB1[i], t1) for i in range(len(xrates))],
-                              hoverinfo='text+name',
-                              fill='tozeroy',
-                              mode='lines',
-                              line={'color': C2, 'width': 1})
+    trace_x1_net = go.Scatter(
+        x=xrates,
+        y=_xS1 - _xB1,
+        name="net %s" % t1,
+        showlegend=False,
+        hovertext=[xrate_hovers[i] + "<br>amount: %.4f %s" % (_xS1[i] - _xB1[i], t1)
+                   for i in _idx],
+        hoverinfo='text+name',
+        fill='tozeroy',
+        mode='lines',
+        line={'color': C2, 'width': 1})
 
-    trace_x2_net = go.Scatter(x=xrates,
-                              y=_xS2 - _xB2,
-                              name="net %s" % t2,
-                              showlegend=False,
-                              hovertext=[xrate_hovers[i] + "<br>amount: %.4f %s"
-                                         % (_xS2[i] - _xB2[i], t2) for i in range(len(xrates))],
-                              hoverinfo='text+name',
-                              fill='tozeroy',
-                              mode='lines',
-                              line={'color': C2, 'width': 1})
+    trace_x2_net = go.Scatter(
+        x=xrates,
+        y=_xS2 - _xB2,
+        name="net %s" % t2,
+        showlegend=False,
+        hovertext=[xrate_hovers[i] + "<br>amount: %.4f %s" % (_xS2[i] - _xB2[i], t2)
+                   for i in _idx],
+        hoverinfo='text+name',
+        fill='tozeroy',
+        mode='lines',
+        line={'color': C2, 'width': 1})
 
     fig.append_trace(trace_xB1, 1, 1)
     fig.append_trace(trace_xS1, 1, 1)
