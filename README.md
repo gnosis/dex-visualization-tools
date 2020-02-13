@@ -1,5 +1,7 @@
 # BATCH AUCTION VISUALIZATIONS
 
+This repo contains python scripts for visualizations of the batch auction exchange. The exchange is built on ethereum and more information about the exchange can be found: [gnosis/dex-contracts](https://github.com/gnosis/dex-contracts).
+
 ## Usage via docker:
 
 Checkout this repo and then build the docker and run it
@@ -9,13 +11,13 @@ docker build -t order_book_printer .
 docker run -it -v ~/PATH_TO_FOLDER/dex-visualization-tools/:/app/ order_book_printer
 ```
 
-Inside the docker, you can visualize the orderbook:
+Inside the docker, you can visualize the order book:
 
 ```
 python3 plot_orderbook_tokenpair.py PAX WETH
 ```
 
-or generate all orderbook plots for all tokens from a json:
+or generate all order book plots for all tokens from a json:
 
 ```
 python3 generate_plot_for_all_pairs.py --jsonFile data/dfusion_input.json
