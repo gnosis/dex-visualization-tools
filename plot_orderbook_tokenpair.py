@@ -72,11 +72,9 @@ def generate_plot(t1: str,
     # xrates = np.linspace(xrate_LB, xrate_UB, 1000)
 
     # Optimization: Plot points only around the corners
-    eps_corner = (xrate_UB - xrate_LB) / 500
-    eps_continuum = (xrate_UB - xrate_LB) / 5000
-
+    eps_corner = (xrate_UB - xrate_LB) / 100
     def corner(f):
-        return [x for x in np.arange(f - eps_corner, f + eps_corner, eps_continuum)]
+        return [f - eps_corner, f, f + eps_corner]
     xrates = np.clip(
         sum([corner(float(s[1])) for s in sell_limits_amounts[t1]], []),
         xrate_LB,
@@ -85,7 +83,7 @@ def generate_plot(t1: str,
     # Add some extra points (otherwise there would be only straight lines) and
     # make sure endpoints are included.
     xrates = np.union1d(xrates, np.linspace(xrate_LB, xrate_UB, 100))
-
+ 
     # Get token names, if available.
     t1_name = util.get_token_name(t1)
     t2_name = util.get_token_name(t2)

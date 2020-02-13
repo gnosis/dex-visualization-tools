@@ -254,6 +254,7 @@ def plot_orderbook(t1: str,
                                       % (_xS1[i], t1) for i in range(len(xrates))],
                            hoverinfo='text+name',
                            fill=None,
+                           mode='lines',
                            line={'color': C0, 'width': 1})
 
     trace_xB1 = go.Scatter(x=xrates,
@@ -264,6 +265,7 @@ def plot_orderbook(t1: str,
                                       % (_xB1[i], t1) for i in range(len(xrates))],
                            hoverinfo='text+name',
                            fill=None,
+                           mode='lines',
                            line={'color': C1, 'width': 1})
 
     trace_x1_min = go.Scatter(x=xrates,
@@ -271,6 +273,7 @@ def plot_orderbook(t1: str,
                               showlegend=False,
                               hoverinfo='skip',
                               fill='tozeroy',
+                              mode='lines',
                               line={'color': '#bfbfbf', 'width': 0})
 
     trace_xS2 = go.Scatter(x=xrates,
@@ -281,6 +284,7 @@ def plot_orderbook(t1: str,
                                       % (_xS2[i], t2) for i in range(len(xrates))],
                            hoverinfo='text+name',
                            fill=None,
+                           mode='lines',
                            line={'color': C1, 'width': 1})
 
     trace_xB2 = go.Scatter(x=xrates,
@@ -291,6 +295,7 @@ def plot_orderbook(t1: str,
                                       % (_xB2[i], t2) for i in range(len(xrates))],
                            hoverinfo='text+name',
                            fill=None,
+                           mode='lines',
                            line={'color': C0, 'width': 1})
 
     trace_x2_min = go.Scatter(x=xrates,
@@ -298,6 +303,7 @@ def plot_orderbook(t1: str,
                               showlegend=False,
                               hoverinfo='skip',
                               fill='tozeroy',
+                              mode='lines',
                               line={'color': '#bfbfbf', 'width': 0})
 
     trace_x1_net = go.Scatter(x=xrates,
@@ -308,6 +314,7 @@ def plot_orderbook(t1: str,
                                          % (_xS1[i] - _xB1[i], t1) for i in range(len(xrates))],
                               hoverinfo='text+name',
                               fill='tozeroy',
+                              mode='lines',
                               line={'color': C2, 'width': 1})
 
     trace_x2_net = go.Scatter(x=xrates,
@@ -318,6 +325,7 @@ def plot_orderbook(t1: str,
                                          % (_xS2[i] - _xB2[i], t2) for i in range(len(xrates))],
                               hoverinfo='text+name',
                               fill='tozeroy',
+                              mode='lines',
                               line={'color': C2, 'width': 1})
 
     fig.append_trace(trace_xB1, 1, 1)
