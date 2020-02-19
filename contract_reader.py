@@ -96,8 +96,8 @@ def get_orderbook():
             continue
 
         # Set token names.
-        sell_token = 'token' + str(o['sellToken'])
-        buy_token = 'token' + str(o['buyToken'])
+        sell_token = 'T%04d' % o['sellToken']
+        buy_token = 'T%04d' % o['buyToken']
 
         # Get sell amount.
         sell_amount = Decimal(min(o['remainingAmount'], o['sellTokenBalance']))
@@ -139,7 +139,7 @@ def get_account_balances(tokens: List[str],
     # Get token adresses first.
     token_adresses = {}
     for t in tokens:
-        tID = int(t.replace('token', ''))
+        tID = int(t.replace('T', ''))
         token_adresses[t] = contract.functions.tokenIdToAddressMap(tID).call()
 
     # Read account balances.
