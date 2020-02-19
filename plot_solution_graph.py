@@ -123,6 +123,11 @@ if __name__ == "__main__":
         type=str,
         help="A JSON input file containing a batch auction instance.")
 
+    parser.add_argument(
+        '--price',
+        type=str,
+        help="A token name used for denomination of the prices.")
+
     args = parser.parse_args()
 
     assert os.path.isfile(args.jsonFile)
@@ -131,9 +136,13 @@ if __name__ == "__main__":
     # Read input JSON.
     inst = util.read_instance_from_file(args.jsonFile)
 
-    # Get token prices.
+    # Get token prices (denominated in token specified).
     assert 'prices' in inst
     token_prices = util.get_token_prices(inst['prices'])
+
+    if args.price is not None:
+        p_ref = token_prices.get(args.price, Decimal(1))
+        token_prices = {t: p / p_ref for t, p in token_prices.items()}
 
     # Get number of orders per token pair.
     assert 'orders' in inst
