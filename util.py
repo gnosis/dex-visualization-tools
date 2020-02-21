@@ -84,6 +84,18 @@ def read_instance_from_file(instance_file: str) -> Dict:
         # Read order data as decimal by default.
         assert 'orders' in inst
         inst['orders'] = _order_data_to_decimal(inst['orders'])
+
+        # Cap orders by the available account balance.
+        for i, o in enumerate(inst['orders']):
+            aID = o.get('accountID')
+            tS = o['sellToken']
+            available_balance = Decimal(inst.get('accounts', {}).get(aID, {}).get(tS, 0))
+            xS_capped = min(o['sellAmount'], available_balance)
+            xB_capped = xS_capped * o['buyAmount'] / o['sellAmount']
+
+            inst['orders'][i]['sellAmount'] = xS_capped
+            inst['orders'][i]['buyAmount'] = xB_capped
+
         return inst
 
     except ValueError:
