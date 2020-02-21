@@ -68,32 +68,34 @@ def generate_plot(t1: str,
     xrate_LB = float(estimated_xrate / Decimal('1.5'))
     xrate_UB = float(estimated_xrate * Decimal('1.5'))
 
+    # Add fees to the orderbook.
+    fee_percentage = Decimal('0.001')
+    fee_multiplier = 1 + fee_percentage
+
     # No optimization: Plot over linear space
     # xrates = np.linspace(xrate_LB, xrate_UB, 1000)
 
     # Optimization: Plot points only around the corners
-    eps_corner = (xrate_UB - xrate_LB) / 100
+    eps_corner = (xrate_UB - xrate_LB) / 10000
+
     def corner(f):
         return [f - eps_corner, f, f + eps_corner]
     xrates = np.clip(
-        sum([corner(float(s[1])) for s in sell_limits_amounts[t1]], []),
+        sum([corner(float(s[0] / fee_multiplier)) for s in sell_limits_amounts[t1]], [])
+        + sum([corner(float(fee_multiplier / s[0])) for s in sell_limits_amounts[t2]], []),
         xrate_LB,
         xrate_UB
     )
     # Add some extra points (otherwise there would be only straight lines) and
     # make sure endpoints are included.
     xrates = np.union1d(xrates, np.linspace(xrate_LB, xrate_UB, 100))
- 
+
     # Get token names, if available.
     t1_name = util.get_token_name(t1)
     t2_name = util.get_token_name(t2)
 
     # Compute cumulated sell/buy amounts on token pair per xrate sample point.
     cumulated_sell_amounts = {t: np.zeros(len(xrates)) for t in [t1_name, t2_name]}
-
-    # Add fees to the orderbook.
-    fee_percentage = Decimal('0.001')
-    fee_multiplier = 1 + fee_percentage
 
     for (limit, sell_amount) in sell_limits_amounts[t1]:
         _executable = np.where(xrates <= limit / fee_multiplier, 1, 0)
