@@ -31,7 +31,8 @@ class LevelFilter(object):
 
 def configure_logger(loglevel):
     """Configure logger (logFile via filename = '...')."""
-    FORMAT = ("[%(levelname)s: %(filename)s:%(lineno)s | %(funcName)s()]  %(message)s")
+    FORMAT = (
+        "[%(levelname)s: %(filename)s:%(lineno)s | %(funcName)s()]  %(message)s")
     formatter = logging.Formatter(FORMAT)
     root = logging.getLogger()
     root.setLevel(loglevel)
@@ -89,7 +90,8 @@ def read_instance_from_file(instance_file: str) -> Dict:
         for i, o in enumerate(inst['orders']):
             aID = o.get('accountID')
             tS = o['sellToken']
-            available_balance = Decimal(inst.get('accounts', {}).get(aID, {}).get(tS, 0))
+            available_balance = Decimal(
+                inst.get('accounts', {}).get(aID, {}).get(tS, 0))
             xS_capped = min(o['sellAmount'], available_balance)
             xB_capped = xS_capped * o['buyAmount'] / o['sellAmount']
 
@@ -115,10 +117,11 @@ def read_instance_from_blockchain() -> Dict:
     batch_id = contract_reader.get_current_batch_id()
 
     # Read all orders.
-    orders = contract_reader.get_orderbook()
+    orders = contract_reader.get_current_orderbook()
 
     # Extract set of participating tokens from orders.
-    tokens = sorted(list(set(sum([(o['sellToken'], o['buyToken']) for o in orders], ()))))
+    tokens = sorted(
+        list(set(sum([(o['sellToken'], o['buyToken']) for o in orders], ()))))
     ref_token = tokens[0]
 
     # Init accounts.
@@ -227,7 +230,8 @@ def get_nr_orders_tokenpair(orders: List[Dict]) -> Dict[EDGE_TYPE, int]:
 
     for (t1, t2), n in sorted(nr_orders_tokenpair.items(),
                               key=lambda i: i[1], reverse=True):
-        logging.debug("Number of orders on token pair %5s <> %-5s : %3d" % (t1, t2, n))
+        logging.debug(
+            "Number of orders on token pair %5s <> %-5s : %3d" % (t1, t2, n))
 
     return nr_orders_tokenpair
 

@@ -87,17 +87,14 @@ def decode_orders(orders_encoded):
         sell_token = 'T%04d' % o['sellToken']
         buy_token = 'T%04d' % o['buyToken']
 
-        # Skip orders that are no longer or not yet valid.
-        if o['validUntil'] < batch_id or o['validFrom'] > batch_id:
-            continue
-
         # Get sell amount.
         sell_amount = Decimal(min(o['remainingAmount'], o['sellTokenBalance']))
         if sell_amount == 0:
             continue
 
         # Compute buy amount from sell amount and limit price.
-        limit_price = Decimal(o['priceNumerator']) / Decimal(o['priceDenominator'])
+        limit_price = Decimal(o['priceNumerator']) / \
+            Decimal(o['priceDenominator'])
         if limit_price == 0:
             buy_amount = 1
         else:
@@ -118,6 +115,22 @@ def decode_orders(orders_encoded):
     return orders_decoded
 
 
+def get_current_orderbook():
+    """Get all order data from smart contract.
+
+    Returns:
+        A list of all orders.
+
+    """
+    orders = get_orderbook()
+
+    # Skip orders that are no longer or not yet valid.
+    batch_id = get_current_batch_id()
+    orders = list(filter(lambda order: order['validUntil'] <
+                         batch_id or order['validFrom'] > batch_id, orders))
+    return orders
+
+
 def get_orderbook():
     """Get all order data from smart contract.
 
@@ -127,9 +140,7 @@ def get_orderbook():
     """
     orders = []
 
-    # Get raw order data.
-    #orders_encoded = contract.functions.getEncodedOrders().call()
-
+    # Get orders via paginated approach
     page_size = 100
     current_user = '0x0000000000000000000000000000000000000000'
     current_offset = 0
@@ -143,12 +154,12 @@ def get_orderbook():
                 current_offset, page_size).call())
 
         orders += orders_decoded_page
-
         if len(orders_decoded_page) > 0:
             current_user = orders_decoded_page[-1]['accountID']
-            current_offset = len([o for o in orders if o['accountID'] == current_user])
+            current_offset = len(
+                [o for o in orders if o['accountID'] == current_user])
 
-        last_page_size == len(orders_decoded_page)
+        last_page_size = len(orders_decoded_page)
 
     return orders
 
