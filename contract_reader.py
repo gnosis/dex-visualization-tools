@@ -77,9 +77,6 @@ def decode_orders(orders_encoded):
     for order_bytes in [orders_encoded[k:k + 112]
                         for k in range(0, len(orders_encoded), 112)]:
 
-        # Get order data.
-        # o = _read_order_from_bytes(order_bytes)
-
         orders_decoded.append(_read_order_from_bytes(order_bytes))
 
     return orders_decoded
