@@ -20,3 +20,4 @@ RUN pip install awscli --upgrade --user
 
 COPY . .
 ENTRYPOINT ["/tini", "--"]
+CMD bash
