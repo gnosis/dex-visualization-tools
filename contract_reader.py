@@ -126,8 +126,8 @@ def get_current_orderbook():
 
     # Skip orders that are no longer or not yet valid.
     batch_id = get_current_batch_id()
-    orders = list(filter(lambda order: order['validUntil'] <
-                         batch_id or order['validFrom'] > batch_id, orders))
+    orders = list(filter(lambda order: order['validUntil'] >=
+                         batch_id or order['validFrom'] <= batch_id, orders))
     return orders
 
 
