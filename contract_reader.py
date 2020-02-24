@@ -70,18 +70,71 @@ def _read_order_from_bytes(order_bytes) -> Dict[str, str]:
 
 
 def decode_orders(orders_encoded):
-
+    """Decode order byte string into list of orders."""
     orders_decoded = []
-
-    # Get current batch ID (for validity check).
-    batch_id = get_current_batch_id()
 
     # Iterate over order byte strings (one order = 112 bytes).
     for order_bytes in [orders_encoded[k:k + 112]
                         for k in range(0, len(orders_encoded), 112)]:
 
         # Get order data.
-        o = _read_order_from_bytes(order_bytes)
+        # o = _read_order_from_bytes(order_bytes)
+
+        orders_decoded.append(_read_order_from_bytes(order_bytes))
+
+    return orders_decoded
+
+
+def get_current_orderbook():
+    """Get all currently valid orders from smart contract.
+
+    Returns:
+        A list of all orders.
+
+    """
+    orders = get_orderbook()
+
+    # Skip orders that are no longer or not yet valid.
+    batch_id = get_current_batch_id()
+    orders = list(filter(lambda order: order['validUntil'] >= batch_id
+                         or order['validFrom'] <= batch_id, orders))
+    return orders
+
+
+def get_orderbook():
+    """Get all order data from smart contract.
+
+    Returns:
+        A list of all orders.
+
+    """
+    orders_raw = []
+
+    # Get orders via paginated approach.
+    page_size = 100
+    current_user = '0x0000000000000000000000000000000000000000'
+    current_offset = 0
+    last_page_size = page_size
+
+    # Read unprocessed order data.
+    while last_page_size == page_size:
+
+        orders_decoded_raw = decode_orders(
+            contract.functions.getEncodedUsersPaginated(
+                Web3.toChecksumAddress(current_user),
+                current_offset, page_size).call())
+
+        orders_raw += orders_decoded_raw
+        if len(orders_decoded_raw) > 0:
+            current_user = orders_decoded_raw[-1]['accountID']
+            current_offset = len(
+                [o for o in orders_raw if o['accountID'] == current_user])
+
+        last_page_size = len(orders_decoded_raw)
+
+    # Process order data.
+    orders = []
+    for o in orders_raw:
 
         # Set token names.
         sell_token = 'T%04d' % o['sellToken']
@@ -93,8 +146,7 @@ def decode_orders(orders_encoded):
             continue
 
         # Compute buy amount from sell amount and limit price.
-        limit_price = Decimal(o['priceNumerator']) / \
-            Decimal(o['priceDenominator'])
+        limit_price = Decimal(o['priceNumerator']) / Decimal(o['priceDenominator'])
         if limit_price == 0:
             buy_amount = 1
         else:
@@ -104,62 +156,13 @@ def decode_orders(orders_encoded):
             "Read order: sellAmount %40d %7s -- buyAmount %40d %7s -- accountID %s"
             % (sell_amount, sell_token, buy_amount, buy_token, o['accountID']))
 
-        orders_decoded.append({'accountID': o['accountID'],
-                               'sellToken': sell_token,
-                               'buyToken': buy_token,
-                               'sellAmount': str(int(sell_amount)),
-                               'buyAmount': str(int(buy_amount)),
-                               'validFrom': o['validFrom'],
-                               'validUntil': o['validUntil']})
-
-    return orders_decoded
-
-
-def get_current_orderbook():
-    """Get all order data from smart contract.
-
-    Returns:
-        A list of all orders.
-
-    """
-    orders = get_orderbook()
-
-    # Skip orders that are no longer or not yet valid.
-    batch_id = get_current_batch_id()
-    orders = list(filter(lambda order: order['validUntil'] >=
-                         batch_id or order['validFrom'] <= batch_id, orders))
-    return orders
-
-
-def get_orderbook():
-    """Get all order data from smart contract.
-
-    Returns:
-        A list of all orders.
-
-    """
-    orders = []
-
-    # Get orders via paginated approach
-    page_size = 100
-    current_user = '0x0000000000000000000000000000000000000000'
-    current_offset = 0
-    last_page_size = page_size
-
-    while last_page_size == page_size:
-
-        orders_decoded_page = decode_orders(
-            contract.functions.getEncodedUsersPaginated(
-                Web3.toChecksumAddress(current_user),
-                current_offset, page_size).call())
-
-        orders += orders_decoded_page
-        if len(orders_decoded_page) > 0:
-            current_user = orders_decoded_page[-1]['accountID']
-            current_offset = len(
-                [o for o in orders if o['accountID'] == current_user])
-
-        last_page_size = len(orders_decoded_page)
+        orders.append({'accountID': o['accountID'],
+                       'sellToken': sell_token,
+                       'buyToken': buy_token,
+                       'sellAmount': str(int(sell_amount)),
+                       'buyAmount': str(int(buy_amount)),
+                       'validFrom': o['validFrom'],
+                       'validUntil': o['validUntil']})
 
     return orders
 
