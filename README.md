@@ -58,4 +58,8 @@ example runs:
 
 - `python plot_order_graph.py --jsonFile data/dfusion_input.json`
 - `python plot_solution_graph.py data/kraken_solution.json`
-- `python plot_orderbook_tokenpair.py PAX WETH
+- `python plot_orderbook_tokenpair.py PAX WETH`
+
+additionally, the network ('mainnet' or 'rinkeby') for the token pair can be defined as well via the network parameter:
+
+- `python plot_orderbook_tokenpair.py PAX WETH --network=rinkeby`

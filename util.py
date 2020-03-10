@@ -8,13 +8,39 @@ from typing import List, Dict, Tuple
 from collections import OrderedDict
 from decimal import Decimal
 
-from TokenInfo import TOKEN_NAMES, TOKEN_DECIMALS
+from TokenInfo import get_token_data
 
 EDGE_TYPE = Tuple[str, str]
 NODE_TYPE = str
 
 # Set float precision (used for string representation).
 FLOAT_PREC = Decimal('1e-6')
+
+
+def get_TOKEN_NAMES():
+    data = get_token_data()
+    token_names = []
+    for token in data:
+        token_names.append(
+            ' "T' + str(token['id']).zfill(4)+'":"' + token['symbol'] + '"')
+    jsonstring = '{ '+','.join(token_names) + ' }'
+    TOKEN_NAMES = json.loads(jsonstring)
+    return TOKEN_NAMES
+
+
+def get_TOKEN_DECIMALS():
+    data = get_token_data()
+    token_decimals = []
+    for token in data:
+        token_decimals.append(
+            ' "T' + str(token['id']).zfill(4)+'":' + str(token['decimals']) + '')
+    jsonstring = '{ '+','.join(token_decimals) + ' }'
+    TOKEN_DECIMALS = json.loads(jsonstring)
+    return TOKEN_DECIMALS
+
+
+TOKEN_DECIMALS = get_TOKEN_DECIMALS()
+TOKEN_NAMES = get_TOKEN_NAMES()
 
 
 class LevelFilter(object):
@@ -104,7 +130,7 @@ def read_instance_from_file(instance_file: str) -> Dict:
         raise
 
 
-def read_instance_from_blockchain() -> Dict:
+def read_instance_from_blockchain(network='mainnet') -> Dict:
     """Read data directly from blockchain.
 
     Returns:
@@ -114,10 +140,10 @@ def read_instance_from_blockchain() -> Dict:
     import contract_reader
 
     # Get ID of current batch.
-    batch_id = contract_reader.get_current_batch_id()
+    batch_id = contract_reader.get_current_batch_id(network)
 
     # Read all orders.
-    orders = contract_reader.get_current_orderbook()
+    orders = contract_reader.get_current_orderbook(network)
 
     # Extract set of participating tokens from orders.
     tokens = sorted(
@@ -125,7 +151,7 @@ def read_instance_from_blockchain() -> Dict:
     ref_token = tokens[0]
 
     # Init accounts.
-    accounts = contract_reader.get_account_balances(tokens, orders)
+    accounts = contract_reader.get_account_balances(tokens, orders, network)
 
     inst = {'tokens': tokens,
             'refToken': ref_token,

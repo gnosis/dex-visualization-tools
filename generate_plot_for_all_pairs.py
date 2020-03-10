@@ -8,7 +8,7 @@ from pathlib import Path
 import argparse
 from multiprocessing import Pool, cpu_count
 from functools import partial
-
+from TokenInfo import get_token_data
 
 if __name__ == "__main__":
     """Main function."""
@@ -52,7 +52,8 @@ if __name__ == "__main__":
     ]
 
     def plot(args):
-        generate_plot(*args, inst['orders'], output_dir, False, auto_open=False)
+        generate_plot(*args, inst['orders'],
+                      output_dir, False, auto_open=False)
 
     num_cores = cpu_count()
     with Pool(num_cores) as pool:
