@@ -87,12 +87,12 @@ if __name__ == "__main__":
 
     parser.add_argument(
         '--network',
-        dest='network',
         type=str,
+        choices=['mainnet', 'rinkeby'],
+        default='mainnet',
         help="Choose one network (mainnet or rinkeby)")
 
     args = parser.parse_args()
-    parser.set_defaults(network='mainnet')
 
     if args.jsonFile is not None:
         # Read input JSON.

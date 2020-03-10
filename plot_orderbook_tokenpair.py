@@ -161,8 +161,9 @@ if __name__ == "__main__":
 
     parser.add_argument(
         '--network',
-        dest='network',
         type=str,
+        choices=['mainnet', 'rinkeby'],
+        default='mainnet',
         help="Choose one network (mainnet or rinkeby)")
 
     parser.add_argument(
@@ -172,7 +173,6 @@ if __name__ == "__main__":
         help="Do not show the output picture in the browser.")
 
     parser.set_defaults(show=True)
-    parser.set_defaults(network='mainnet')
 
     args = parser.parse_args()
 

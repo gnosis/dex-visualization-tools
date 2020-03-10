@@ -117,12 +117,13 @@ def get_orderbook(network='mainnet'):
     current_user = '0x0000000000000000000000000000000000000000'
     current_offset = 0
     last_page_size = page_size
+    contract = init_contract(network)
 
     # Read unprocessed order data.
     while last_page_size == page_size:
 
         orders_decoded_raw = decode_orders(
-            init_contract(network).functions.getEncodedUsersPaginated(
+            contract.functions.getEncodedUsersPaginated(
                 Web3.toChecksumAddress(current_user),
                 current_offset, page_size).call())
 
@@ -171,7 +172,8 @@ def get_orderbook(network='mainnet'):
 
 
 def get_account_balances(tokens: List[str],
-                         orders: List[Dict], network='mainnet') -> Dict[str, Dict[str, str]]:
+                         orders: List[Dict],
+                         network='mainnet') -> Dict[str, Dict[str, str]]:
     """Get account balances of the sell tokens of all orders.
 
     Args:
@@ -183,8 +185,7 @@ def get_account_balances(tokens: List[str],
 
     """
     # Get token adresses first.
-    contract = init_contract(
-        network)
+    contract = init_contract(network)
     token_adresses = {}
     for t in tokens:
         tID = int(t.replace('T', ''))

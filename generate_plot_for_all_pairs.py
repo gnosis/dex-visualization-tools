@@ -26,6 +26,13 @@ if __name__ == "__main__":
         type=str,
         help="A JSON input file containing a batch auction instance.")
 
+    parser.add_argument(
+        '--network',
+        type=str,
+        choices=['mainnet', 'rinkeby'],
+        default='mainnet',
+        help="Choose one network (mainnet or rinkeby)")
+
     args = parser.parse_args()
 
     if args.jsonFile is not None:
@@ -34,7 +41,7 @@ if __name__ == "__main__":
         inst = util.read_instance_from_file(args.jsonFile)
     else:
         # Get instance from blockchain.
-        inst = util.read_instance_from_blockchain()
+        inst = util.read_instance_from_blockchain(args.network)
 
     # Get max token ID
     # Todo: This can be automatized, but then also the TokenInfo.py must be generated automatically
