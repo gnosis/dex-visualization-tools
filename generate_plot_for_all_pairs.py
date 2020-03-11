@@ -7,7 +7,7 @@ from plot_orderbook_tokenpair import generate_plot
 from pathlib import Path
 import argparse
 from multiprocessing import Pool, cpu_count
-from contract_reader import Contract_reader
+from contract_reader import ContractReader
 from functools import partial
 
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
         help="Choose one network (mainnet or rinkeby)")
 
     args = parser.parse_args()
-    contract_reader = Contract_reader(args.network)
+    contract_reader = ContractReader(args.network)
 
     batch_ID = contract_reader.get_current_batch_id()
     output_dir = './orderbook_plots_' + str(batch_ID)
