@@ -12,6 +12,7 @@ from typing import Dict
 import decimal
 from decimal import Decimal
 from plot_utils import plot_network
+from contract_reader import ContractReader
 import util
 from util import EDGE_TYPE
 
@@ -85,6 +86,13 @@ if __name__ == "__main__":
         type=str,
         help="A JSON input file containing a batch auction instance.")
 
+    parser.add_argument(
+        '--network',
+        type=str,
+        choices=['mainnet', 'rinkeby'],
+        default='mainnet',
+        help="Choose one network (mainnet or rinkeby)")
+
     args = parser.parse_args()
 
     if args.jsonFile is not None:
@@ -95,7 +103,8 @@ if __name__ == "__main__":
     else:
         # Get instance from blockchain.
         output_dir = './'
-        inst = util.read_instance_from_blockchain()
+        contract_reader = ContractReader(args.network)
+        inst = util.read_instance_from_blockchain(contract_reader)
 
     # Get number of orders per token pair.
     assert 'orders' in inst

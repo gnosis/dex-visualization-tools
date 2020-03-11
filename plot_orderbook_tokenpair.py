@@ -14,6 +14,7 @@ from decimal import Decimal
 import numpy as np
 
 from plot_utils import plot_orderbook
+from contract_reader import ContractReader
 import util
 
 
@@ -45,13 +46,16 @@ def generate_plot(t1: str,
             continue
 
         # Get amounts scaled to human-readable values.
-        sell_amount = Decimal(o['sellAmount']) / Decimal(10**util.get_token_decimals(tS))
-        buy_amount = Decimal(o['buyAmount']) / Decimal(10**util.get_token_decimals(tB))
+        sell_amount = Decimal(o['sellAmount']) / \
+            Decimal(10**util.get_token_decimals(tS))
+        buy_amount = Decimal(o['buyAmount']) / \
+            Decimal(10**util.get_token_decimals(tB))
         if buy_amount != 0:
             total_amounts[tB] += buy_amount
             total_amounts[tS] += sell_amount
 
-            sell_limits_amounts[tS].append((sell_amount / buy_amount, sell_amount))
+            sell_limits_amounts[tS].append(
+                (sell_amount / buy_amount, sell_amount))
 
     # Skip, if no orders for given token pair.
     if len(sell_limits_amounts) == 0:
@@ -81,8 +85,10 @@ def generate_plot(t1: str,
     def corner(f):
         return [f - eps_corner, f, f + eps_corner]
     xrates = np.clip(
-        sum([corner(float(s[0] / fee_multiplier)) for s in sell_limits_amounts[t1]], [])
-        + sum([corner(float(fee_multiplier / s[0])) for s in sell_limits_amounts[t2]], []),
+        sum([corner(float(s[0] / fee_multiplier))
+             for s in sell_limits_amounts[t1]], [])
+        + sum([corner(float(fee_multiplier / s[0]))
+               for s in sell_limits_amounts[t2]], []),
         xrate_LB,
         xrate_UB
     )
@@ -95,7 +101,8 @@ def generate_plot(t1: str,
     t2_name = util.get_token_name(t2)
 
     # Compute cumulated sell/buy amounts on token pair per xrate sample point.
-    cumulated_sell_amounts = {t: np.zeros(len(xrates)) for t in [t1_name, t2_name]}
+    cumulated_sell_amounts = {t: np.zeros(len(xrates)) for t in [
+        t1_name, t2_name]}
 
     for (limit, sell_amount) in sell_limits_amounts[t1]:
         _executable = np.where(xrates <= limit / fee_multiplier, 1, 0)
@@ -154,6 +161,13 @@ if __name__ == "__main__":
         help="Show the output picture in the browser.")
 
     parser.add_argument(
+        '--network',
+        type=str,
+        choices=['mainnet', 'rinkeby'],
+        default='mainnet',
+        help="Choose one network (mainnet or rinkeby)")
+
+    parser.add_argument(
         '--no-show',
         dest='show',
         action='store_false',
@@ -171,7 +185,8 @@ if __name__ == "__main__":
     else:
         # Get instance from blockchain.
         output_dir = './'
-        inst = util.read_instance_from_blockchain()
+        contract_reader = ContractReader(args.network)
+        inst = util.read_instance_from_blockchain(contract_reader)
 
     # Get token IDs.
     t1 = util.get_token_ID(args.t1)

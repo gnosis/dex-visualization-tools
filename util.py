@@ -104,14 +104,13 @@ def read_instance_from_file(instance_file: str) -> Dict:
         raise
 
 
-def read_instance_from_blockchain() -> Dict:
+def read_instance_from_blockchain(contract_reader) -> Dict:
     """Read data directly from blockchain.
 
     Returns:
         A dict containing the instance data.
 
     """
-    import contract_reader
 
     # Get ID of current batch.
     batch_id = contract_reader.get_current_batch_id()
