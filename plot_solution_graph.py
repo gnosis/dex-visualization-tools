@@ -75,7 +75,8 @@ def generate_plot(nr_orders_tokenpair: Dict[EDGE_TYPE, int],
                       util.decimal_to_str(token_amounts_bought.get(t)))
                    for t in tokens}
 
-    edge_weights = {tp: v for (tp, v) in trading_volume_tokenpairs.items() if v > 0}
+    edge_weights = {tp: v for (
+        tp, v) in trading_volume_tokenpairs.items() if v > 0}
 
     edge_hovers = {(t1, t2): "=== %s/%s ===<br>"
                    "exchange rate : %s %s/%s <> %s %s/%s<br>"
@@ -87,9 +88,12 @@ def generate_plot(nr_orders_tokenpair: Dict[EDGE_TYPE, int],
                       util.decimal_to_str(xrates.get((t2, t1))), t1, t2,
                       (nr_exec_orders_tokenpair.get((t1, t2), 0)
                        + nr_exec_orders_tokenpair.get((t2, t1), 0)),
-                      t1, util.decimal_to_str(tokenpair_amounts_sold.get((t1, t2), Decimal('0'))),
-                      t1, util.decimal_to_str(tokenpair_amounts_bought.get((t1, t2), Decimal('0'))),
-                      t2, util.decimal_to_str(tokenpair_amounts_sold.get((t2, t1), Decimal('0'))),
+                      t1, util.decimal_to_str(
+                          tokenpair_amounts_sold.get((t1, t2), Decimal('0'))),
+                      t1, util.decimal_to_str(
+                          tokenpair_amounts_bought.get((t1, t2), Decimal('0'))),
+                      t2, util.decimal_to_str(
+                          tokenpair_amounts_sold.get((t2, t1), Decimal('0'))),
                       t2, util.decimal_to_str(tokenpair_amounts_bought.get((t2, t1), Decimal('0'))))
                    for (t1, t2) in tokenpairs}
 
@@ -158,7 +162,8 @@ if __name__ == "__main__":
 
     logging.info("=== TOKEN PRICES ===")
     for t, p in token_prices.items():
-        logging.info("%5s : %14s" % (t, util.decimal_to_str(token_prices.get(t))))
+        logging.info("%5s : %14s" %
+                     (t, util.decimal_to_str(token_prices.get(t))))
 
     logging.info("=== EXECUTED ORDERS ===")
     for idx, o in enumerate(inst['orders']):
@@ -191,10 +196,13 @@ if __name__ == "__main__":
                (nr_exec_orders_tokenpair.get((t1, t2), 0)
                 + nr_exec_orders_tokenpair.get((t2, t1), 0)),
                t1,
-               util.decimal_to_str(tokenpair_amounts_sold.get((t1, t2), Decimal('0'))),
-               util.decimal_to_str(tokenpair_amounts_bought.get((t1, t2), Decimal('0'))),
+               util.decimal_to_str(
+                   tokenpair_amounts_sold.get((t1, t2), Decimal('0'))),
+               util.decimal_to_str(
+                   tokenpair_amounts_bought.get((t1, t2), Decimal('0'))),
                t2,
-               util.decimal_to_str(tokenpair_amounts_sold.get((t2, t1), Decimal('0'))),
+               util.decimal_to_str(
+                   tokenpair_amounts_sold.get((t2, t1), Decimal('0'))),
                util.decimal_to_str(tokenpair_amounts_bought.get((t2, t1), Decimal('0')))))
 
     # Plot.

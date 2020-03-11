@@ -85,6 +85,13 @@ if __name__ == "__main__":
         type=str,
         help="A JSON input file containing a batch auction instance.")
 
+    parser.add_argument(
+        '--network',
+        type=str,
+        choices=['mainnet', 'rinkeby'],
+        default='mainnet',
+        help="Choose one network (mainnet or rinkeby)")
+
     args = parser.parse_args()
 
     if args.jsonFile is not None:
@@ -95,7 +102,7 @@ if __name__ == "__main__":
     else:
         # Get instance from blockchain.
         output_dir = './'
-        inst = util.read_instance_from_blockchain()
+        inst = util.read_instance_from_blockchain(args.network)
 
     # Get number of orders per token pair.
     assert 'orders' in inst
