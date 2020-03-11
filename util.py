@@ -104,20 +104,19 @@ def read_instance_from_file(instance_file: str) -> Dict:
         raise
 
 
-def read_instance_from_blockchain(network='mainnet') -> Dict:
+def read_instance_from_blockchain(contract_reader) -> Dict:
     """Read data directly from blockchain.
 
     Returns:
         A dict containing the instance data.
 
     """
-    import contract_reader
 
     # Get ID of current batch.
-    batch_id = contract_reader.get_current_batch_id(network)
+    batch_id = contract_reader.get_current_batch_id()
 
     # Read all orders.
-    orders = contract_reader.get_current_orderbook(network)
+    orders = contract_reader.get_current_orderbook()
 
     # Extract set of participating tokens from orders.
     tokens = sorted(
@@ -125,7 +124,7 @@ def read_instance_from_blockchain(network='mainnet') -> Dict:
     ref_token = tokens[0]
 
     # Init accounts.
-    accounts = contract_reader.get_account_balances(tokens, orders, network)
+    accounts = contract_reader.get_account_balances(tokens, orders)
 
     inst = {'tokens': tokens,
             'refToken': ref_token,

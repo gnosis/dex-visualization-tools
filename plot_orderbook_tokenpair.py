@@ -14,6 +14,7 @@ from decimal import Decimal
 import numpy as np
 
 from plot_utils import plot_orderbook
+from contract_reader import Contract_reader
 import util
 
 
@@ -184,7 +185,8 @@ if __name__ == "__main__":
     else:
         # Get instance from blockchain.
         output_dir = './'
-        inst = util.read_instance_from_blockchain(args.network)
+        contract_reader = Contract_reader(args.network)
+        inst = util.read_instance_from_blockchain(contract_reader)
 
     # Get token IDs.
     t1 = util.get_token_ID(args.t1)

@@ -7,15 +7,12 @@ from plot_orderbook_tokenpair import generate_plot
 from pathlib import Path
 import argparse
 from multiprocessing import Pool, cpu_count
+from contract_reader import Contract_reader
 from functools import partial
 
 
 if __name__ == "__main__":
     """Main function."""
-
-    batch_ID = contract_reader.get_current_batch_id()
-    output_dir = './orderbook_plots_' + str(batch_ID)
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     # Process command line arguments.
     parser = argparse.ArgumentParser(
@@ -34,6 +31,11 @@ if __name__ == "__main__":
         help="Choose one network (mainnet or rinkeby)")
 
     args = parser.parse_args()
+    contract_reader = Contract_reader(args.network)
+
+    batch_ID = contract_reader.get_current_batch_id()
+    output_dir = './orderbook_plots_' + str(batch_ID)
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     if args.jsonFile is not None:
         # Read input JSON.
@@ -41,7 +43,7 @@ if __name__ == "__main__":
         inst = util.read_instance_from_file(args.jsonFile)
     else:
         # Get instance from blockchain.
-        inst = util.read_instance_from_blockchain(args.network)
+        inst = util.read_instance_from_blockchain(contract_reader)
 
     # Get max token ID
     # Todo: This can be automatized, but then also the TokenInfo.py must be generated automatically

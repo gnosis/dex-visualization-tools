@@ -12,6 +12,7 @@ from typing import Dict
 import decimal
 from decimal import Decimal
 from plot_utils import plot_network
+from contract_reader import Contract_reader
 import util
 from util import EDGE_TYPE
 
@@ -102,7 +103,8 @@ if __name__ == "__main__":
     else:
         # Get instance from blockchain.
         output_dir = './'
-        inst = util.read_instance_from_blockchain(args.network)
+        contract_reader = Contract_reader(args.network)
+        inst = util.read_instance_from_blockchain(contract_reader)
 
     # Get number of orders per token pair.
     assert 'orders' in inst
