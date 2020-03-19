@@ -83,20 +83,33 @@ def restrict_order_sell_amounts_by_balances(
         The capped orders.
 
     """
+    def _xrate(sell_amount, buy_amount):
+        return Decimal(sell_amount) / Decimal(buy_amount) if Decimal(buy_amount) > 0 \
+            else Decimal('infinity')
+
+    def _cap_sell_amount_by_balance(sell_amount_old, balance):
+        """Cap sell amount by account balance."""
+        return min(sell_amount_old, remaining_balances[aID, tS, tB])
+
+    def _update_buy_amount_from_new_sell_amount(
+            buy_amount_old, sell_amount_new, sell_amount_old):
+        """Reduce buy amount to correspond to new sell amount."""
+        buy_amount_new = buy_amount_old * sell_amount_new / sell_amount_old
+        return buy_amount_new.to_integral_value(rounding=ROUND_UP)
+
     orders_capped = []
 
     # Init dict for remaining balance per account and token pair.
     remaining_balances = {}
 
-    # Iterate over orders sorted by their limit price [best-to-worst]
-    # (adding +1 in case some number is equal to zero, preserving the ordering).
+    # Iterate over orders sorted by their limit price [best-to-worst].
     # Potential side-effect:
     # This may in certain cases interfere with the max-nr-exec-orders or the
     # min-avg-fee-per-order (economic viability) constraint, where a larger order
     # with a worse price might be preferred over a smaller order with a better price.
     for o in sorted(
             orders,
-            key=lambda o: (Decimal(o['sellAmount']) + 1) / (Decimal(o['buyAmount']) + 1),
+            key=lambda o: _xrate(o['sellAmount'], o['buyAmount']),
             reverse=True
     ):
         tS, tB = o['sellToken'], o['buyToken']
@@ -111,7 +124,8 @@ def restrict_order_sell_amounts_by_balances(
             sell_token_balance = Decimal(accounts.get(aID, {}).get(tS, 0))
             remaining_balances[(aID, tS, tB)] = sell_token_balance
 
-        sell_amount_new = min(sell_amount_old, remaining_balances[aID, tS, tB])
+        sell_amount_new = _cap_sell_amount_by_balance(
+            sell_amount_old, remaining_balances[aID, tS, tB])
 
         # Update remaining balance.
         remaining_balances[aID, tS, tB] -= sell_amount_new
@@ -131,8 +145,8 @@ def restrict_order_sell_amounts_by_balances(
 
         # Update buy amount according to capped sell amount.
         buy_amount_old = Decimal(o['buyAmount'])
-        buy_amount_new = buy_amount_old * sell_amount_new / sell_amount_old
-        buy_amount_new = buy_amount_new.to_integral_value(rounding=ROUND_UP)
+        buy_amount_new = _update_buy_amount_from_new_sell_amount(
+            buy_amount_old, sell_amount_new, sell_amount_old)
 
         logging.debug(
             "Updated buy amount of <%s> : %40d --> %25d  [%s]"
