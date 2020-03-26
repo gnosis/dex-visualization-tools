@@ -6,7 +6,7 @@ import logging
 import json
 from typing import List, Dict, Tuple
 from collections import OrderedDict
-from decimal import Decimal
+from decimal import Decimal, ROUND_UP
 
 from TokenInfo import TOKEN_NAMES, TOKEN_DECIMALS
 
@@ -68,6 +68,99 @@ def _order_data_to_decimal(orders: List[Dict]) -> List[Dict]:
     return orders
 
 
+def restrict_order_sell_amounts_by_balances(
+        orders: List[Dict],
+        accounts: Dict[str, Dict[str, int]]) -> List[Dict]:
+    """Restrict order sell amounts to available account balances.
+
+    This method also filters out orders that end up with a sell amount of zero.
+
+    Args:
+        orders: List of orders.
+        accounts: Dict of accounts and their token balances.
+
+    Returns:
+        The capped orders.
+
+    """
+    def _xrate(sell_amount, buy_amount):
+        return Decimal(sell_amount) / Decimal(buy_amount) if Decimal(buy_amount) > 0 \
+            else Decimal('infinity')
+
+    def _cap_sell_amount_by_balance(sell_amount_old, balance):
+        """Cap sell amount by account balance."""
+        return min(sell_amount_old, remaining_balances[aID, tS, tB])
+
+    def _update_buy_amount_from_new_sell_amount(
+            buy_amount_old, sell_amount_new, sell_amount_old):
+        """Reduce buy amount to correspond to new sell amount."""
+        buy_amount_new = buy_amount_old * sell_amount_new / sell_amount_old
+        return buy_amount_new.to_integral_value(rounding=ROUND_UP)
+
+    orders_capped = []
+
+    # Init dict for remaining balance per account and token pair.
+    remaining_balances = {}
+
+    # Iterate over orders sorted by their limit price [best-to-worst].
+    # Potential side-effect:
+    # This may in certain cases interfere with the max-nr-exec-orders or the
+    # min-avg-fee-per-order (economic viability) constraint, where a larger order
+    # with a worse price might be preferred over a smaller order with a better price.
+    for o in sorted(
+            orders,
+            key=lambda o: _xrate(o['sellAmount'], o['buyAmount']),
+            reverse=True
+    ):
+        tS, tB = o['sellToken'], o['buyToken']
+
+        # Get sell amount (capped by available account balance).
+        sell_amount_old = Decimal(o['sellAmount'])
+
+        # Init remaining balance for new token pair on some account.
+        aID = o['accountID']
+        oID = "%s|%s" % (aID, o.get('orderID'))
+        if (aID, tS, tB) not in remaining_balances:
+            sell_token_balance = Decimal(accounts.get(aID, {}).get(tS, 0))
+            remaining_balances[(aID, tS, tB)] = sell_token_balance
+
+        sell_amount_new = _cap_sell_amount_by_balance(
+            sell_amount_old, remaining_balances[aID, tS, tB])
+
+        # Update remaining balance.
+        remaining_balances[aID, tS, tB] -= sell_amount_new
+        assert remaining_balances[aID, tS, tB] >= 0
+
+        logging.debug(
+            "Capping sell amount of <%s> by account balance [%s] : %40d --> %25d"
+            % (oID, tS, sell_amount_old, sell_amount_new))
+
+        # Skip orders with zero sell amount.
+        if sell_amount_new == 0:
+            logging.debug(
+                "Removing order <%s> : zero sell amount or available balance!" % oID)
+            continue
+        else:
+            assert sell_amount_old > 0
+
+        # Update buy amount according to capped sell amount.
+        buy_amount_old = Decimal(o['buyAmount'])
+        buy_amount_new = _update_buy_amount_from_new_sell_amount(
+            buy_amount_old, sell_amount_new, sell_amount_old)
+
+        logging.debug(
+            "Updated buy amount of <%s> : %40d --> %25d  [%s]"
+            % (oID, buy_amount_old, buy_amount_new, tB))
+
+        o['sellAmount'] = str(sell_amount_new)
+        o['buyAmount'] = str(buy_amount_new)
+
+        # Append capped order.
+        orders_capped.append(o)
+
+    return orders_capped
+
+
 def read_instance_from_file(instance_file: str) -> Dict:
     """Read data from instance JSON file.
 
@@ -82,21 +175,12 @@ def read_instance_from_file(instance_file: str) -> Dict:
         with open(instance_file) as f:
             inst = json.load(f, object_pairs_hook=OrderedDict)
 
-        # Read order data as decimal by default.
-        assert 'orders' in inst
-        inst['orders'] = _order_data_to_decimal(inst['orders'])
-
         # Cap orders by the available account balance.
-        for i, o in enumerate(inst['orders']):
-            aID = o.get('accountID')
-            tS = o['sellToken']
-            available_balance = Decimal(
-                inst.get('accounts', {}).get(aID, {}).get(tS, 0))
-            xS_capped = min(o['sellAmount'], available_balance)
-            xB_capped = xS_capped * o['buyAmount'] / o['sellAmount']
+        inst['orders'] = restrict_order_sell_amounts_by_balances(
+            inst['orders'], inst['accounts'])
 
-            inst['orders'][i]['sellAmount'] = xS_capped
-            inst['orders'][i]['buyAmount'] = xB_capped
+        # Read order data as decimal by default.
+        inst['orders'] = _order_data_to_decimal(inst['orders'])
 
         return inst
 
@@ -111,7 +195,6 @@ def read_instance_from_blockchain(contract_reader) -> Dict:
         A dict containing the instance data.
 
     """
-
     # Get ID of current batch.
     batch_id = contract_reader.get_current_batch_id()
 
@@ -125,6 +208,9 @@ def read_instance_from_blockchain(contract_reader) -> Dict:
 
     # Init accounts.
     accounts = contract_reader.get_account_balances(tokens, orders)
+
+    # Cap orders by the available account balance.
+    orders = restrict_order_sell_amounts_by_balances(orders, accounts)
 
     inst = {'tokens': tokens,
             'refToken': ref_token,
