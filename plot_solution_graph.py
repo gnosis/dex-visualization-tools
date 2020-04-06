@@ -8,7 +8,7 @@ Example call:
 import os
 import argparse
 import logging
-from typing import Dict
+from typing import List, Dict
 from decimal import Decimal
 
 from plot_utils import plot_network
@@ -16,19 +16,21 @@ import util
 from util import EDGE_TYPE, NODE_TYPE
 
 
-def generate_plot(nr_orders_tokenpair: Dict[EDGE_TYPE, int],
-                  nr_exec_orders_tokenpair: Dict[EDGE_TYPE, int],
-                  token_prices: Dict[NODE_TYPE, Decimal],
-                  token_amounts_sold: Dict[NODE_TYPE, Decimal],
-                  token_amounts_bought: Dict[NODE_TYPE, Decimal],
-                  tokenpair_amounts_sold: Dict[EDGE_TYPE, Decimal],
-                  tokenpair_amounts_bought: Dict[EDGE_TYPE, Decimal],
-                  output_dir: str = './',
-                  ipython: bool = False,
-                  **kwargs):
+def generate_plot(
+        tokens: List[NODE_TYPE],
+        nr_exec_orders_tokenpair: Dict[EDGE_TYPE, int],
+        token_prices: Dict[NODE_TYPE, Decimal],
+        token_amounts_sold: Dict[NODE_TYPE, Decimal],
+        token_amounts_bought: Dict[NODE_TYPE, Decimal],
+        tokenpair_amounts_sold: Dict[EDGE_TYPE, Decimal],
+        tokenpair_amounts_bought: Dict[EDGE_TYPE, Decimal],
+        output_dir: str = './',
+        ipython: bool = False,
+        **kwargs):
     """Generate a token-order-graph plot using plotly.
 
     Args:
+        tokens: List of token names.
         nr_orders_tokenpair: Dict of token pairs => number of orders.
         nr_exec_orders_tokenpair: Dict of token pairs => number of executed orders.
         token_prices: Dict of tokens => token price.
@@ -43,8 +45,7 @@ def generate_plot(nr_orders_tokenpair: Dict[EDGE_TYPE, int],
 
     """
     # Extract set of tokens and token pairs.
-    tokenpairs = nr_orders_tokenpair.keys()
-    tokens = sorted(list(set(sum(tokenpairs, ()))))
+    tokenpairs = nr_exec_orders_tokenpair.keys()
 
     trading_volume_tokens = {
         t: (token_amounts_sold.get(t, 0) * token_prices.get(t, 0)
@@ -140,6 +141,9 @@ if __name__ == "__main__":
     # Read input JSON.
     inst = util.read_instance_from_file(args.jsonFile)
 
+    # Get list of tokens.
+    tokens = util.get_tokens(inst['tokens'])
+
     # Get token prices (denominated in token specified).
     assert 'prices' in inst
     token_prices = util.get_token_prices(inst['prices'])
@@ -207,7 +211,7 @@ if __name__ == "__main__":
 
     # Plot.
     generate_plot(
-        nr_orders_tokenpair,
+        tokens,
         nr_exec_orders_tokenpair,
         token_prices,
         token_amounts_sold,

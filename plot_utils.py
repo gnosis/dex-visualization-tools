@@ -61,15 +61,16 @@ def plot_network(nodes: List[NODE_TYPE],
     node_weights = {nID: node_weights[nID]
                     if nID in node_weights else wmin for nID in nodes}
 
-    if max(node_weights.values()) > wmax:
-        node_weights = {nID: node_weights[nID] / max(node_weights.values()) * wmax
-                        for nID in nodes}
+    if node_weights:
+        if max(node_weights.values()) > wmax:
+            node_weights = {nID: node_weights[nID] / max(node_weights.values()) * wmax
+                            for nID in nodes}
 
-    if min(node_weights.values()) < wmin:
-        node_weights = {nID: wmax - (wmax - node_weights[nID]) / (wmax - min(node_weights.values())) * (wmax - wmin)
-                        for nID in nodes}
+        if min(node_weights.values()) < wmin:
+            node_weights = {nID: wmax - (wmax - node_weights[nID]) / (wmax - min(node_weights.values())) * (wmax - wmin)
+                            for nID in nodes}
 
-    assert min(node_weights.values()) >= wmin and max(node_weights.values()) <= wmax
+        assert min(node_weights.values()) >= wmin and max(node_weights.values()) <= wmax
 
     # Init node hovers, if required.
     node_hovers = {nID: node_hovers[nID]
@@ -88,6 +89,7 @@ def plot_network(nodes: List[NODE_TYPE],
         hoverinfo='text',
         marker=go.scatter.Marker(
             size=[node_weights[nID] for nID in nodes],
+            sizemin=wmin,
             showscale=False,
             colorscale='Reds',
             reversescale=False,
@@ -106,7 +108,7 @@ def plot_network(nodes: List[NODE_TYPE],
 
     else:
         # Scale edge weights to some interval.
-        wL, wU = (1., 20.)
+        wL, wU = (2., 20.)
         if edge_weights is None:
             edge_weights = {}
         elif all(math.isnan(w) for w in edge_weights.values()):

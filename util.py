@@ -4,7 +4,7 @@
 import sys
 import logging
 import json
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Union
 from collections import OrderedDict
 from decimal import Decimal, ROUND_UP
 
@@ -282,6 +282,22 @@ def get_token_prices(prices: Dict[str, str]) -> Dict[str, Decimal]:
     """
     return {get_token_name(t): Decimal(p) / Decimal(10**(36 - get_token_decimals(t)))
             for t, p in prices.items() if p is not None}
+
+
+def get_tokens(tokens: Union[Dict[NODE_TYPE, Dict], List[NODE_TYPE]]) -> List[NODE_TYPE]:
+    """Get list of tokens by their names.
+
+    Args:
+        tokens: List or dict of tokens.
+
+    Returns:
+        List with all token names.
+
+    """
+    if isinstance(tokens, dict):
+        tokens = tokens.keys()
+
+    return [get_token_name(t) for t in tokens]
 
 
 def get_order_amount_scaled(amount: Decimal, token_ID: str):
