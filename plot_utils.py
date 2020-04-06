@@ -107,7 +107,7 @@ def plot_network(nodes: List[NODE_TYPE],
 
     else:
         # Scale edge weights to some interval.
-        wL, wU = (1., 20.)
+        wL, wU = (2., 20.)
         if edge_weights is None:
             edge_weights = {}
         elif all(math.isnan(w) for w in edge_weights.values()):
