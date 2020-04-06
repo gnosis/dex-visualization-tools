@@ -89,6 +89,7 @@ def plot_network(nodes: List[NODE_TYPE],
         hoverinfo='text',
         marker=go.scatter.Marker(
             size=[node_weights[nID] for nID in nodes],
+            sizemin=wmin,
             showscale=False,
             colorscale='Reds',
             reversescale=False,
