@@ -1,4 +1,4 @@
-# BATCH AUCTION VISUALIZATIONS
+# Gnosis Protocol (formerly dfusion) visualizations
 
 ## Usage via docker:
 
@@ -45,14 +45,14 @@ python3 plot_solution_graph.py data/kraken_solution.json
 - Orderbook plots (buy and sell amounts for token pairs):
   `python plot_orderbook_tokenpair.py [TOKEN1] [TOKEN2] [--jsonFile INSTANCE_JSON]`
 
-If no JSON file is provided for `plot_order_graph.py` and `plot_orderbook_tokenpair.py`, the script will fetch the data directly from the dfusion smart contract.
+If no JSON file is provided for `plot_order_graph.py` and `plot_orderbook_tokenpair.py`, the script will fetch the data directly from the Gnosis Protocol smart contract.
 
 ## Example data
 
 in `data/`:
 
 - `kraken_{instance|solution}.json` - instance and solution from Kraken exchange
-- `dfusion_{instance|solution}.json` - instance and solution from dfusion PoC
+- `dfusion_{instance|solution}.json` - instance and solution from Gnosis Protocol PoC
 
 example runs:
 
