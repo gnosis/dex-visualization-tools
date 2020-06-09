@@ -117,8 +117,6 @@ def generate_plot(
 if __name__ == "__main__":
     """Main function."""
 
-    util.configure_logger(logging.INFO)
-
     # Process command line arguments.
     parser = argparse.ArgumentParser(
         description='Input file and output directory parser.')
@@ -133,7 +131,16 @@ if __name__ == "__main__":
         type=str,
         help="A token name used for denomination of the prices.")
 
+    parser.add_argument(
+        '--logging',
+        type=str.upper,
+        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+        default='INFO',
+        help="Logging level.")
+
     args = parser.parse_args()
+
+    util.configure_logger(getattr(logging, args.logging))
 
     assert os.path.isfile(args.jsonFile)
     output_dir = os.path.dirname(args.jsonFile)
