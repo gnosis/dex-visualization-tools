@@ -148,12 +148,12 @@ if __name__ == "__main__":
     # Read input JSON.
     inst = util.read_instance_from_file(args.jsonFile)
 
-    # Get list of tokens.
-    tokens = util.get_tokens(inst['tokens'])
-
     # Get token prices (denominated in token specified).
     assert 'prices' in inst
     token_prices = util.get_token_prices(inst['prices'])
+
+    # Get list of tokens.
+    tokens = token_prices.keys()
 
     if args.price is not None:
         p_ref = token_prices.get(args.price, Decimal(1))
