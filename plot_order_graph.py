@@ -75,8 +75,6 @@ def generate_plot(nr_orders_tokenpair: Dict[EDGE_TYPE, int],
 if __name__ == "__main__":
     """Main function."""
 
-    util.configure_logger(logging.INFO)
-
     # Process command line arguments.
     parser = argparse.ArgumentParser(
         description='Input file and output directory parser.')
@@ -93,7 +91,16 @@ if __name__ == "__main__":
         default='mainnet',
         help="Choose one network (mainnet or rinkeby)")
 
+    parser.add_argument(
+        '--logging',
+        type=str.upper,
+        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+        default='INFO',
+        help="Logging level.")
+
     args = parser.parse_args()
+
+    util.configure_logger(getattr(logging, args.logging))
 
     if args.jsonFile is not None:
         # Read input JSON.
