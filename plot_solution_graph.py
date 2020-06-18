@@ -100,7 +100,8 @@ def generate_plot(
 
     # Plot.
     plot_network(
-        tokens, list(edge_weights.keys()),
+        nodes=tokens,
+        edges=list(edge_weights.keys()),
         node_weights=node_weights,
         node_labels=node_labels,
         node_hovers=node_hovers,
