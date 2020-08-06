@@ -16,6 +16,7 @@ import numpy as np
 from plot_utils import plot_orderbook
 from contract_reader import ContractReader
 import util
+import TokenInfo
 
 
 def generate_plot(t1: str,
@@ -187,6 +188,8 @@ if __name__ == "__main__":
         output_dir = './'
         contract_reader = ContractReader(args.network)
         inst = util.read_instance_from_blockchain(contract_reader)
+
+    TokenInfo.update(inst['tokens'])
 
     # Get token IDs.
     t1 = util.get_token_ID(args.t1)

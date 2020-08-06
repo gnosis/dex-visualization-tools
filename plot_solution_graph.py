@@ -14,6 +14,7 @@ from decimal import Decimal
 from plot_utils import plot_network
 import util
 from util import EDGE_TYPE, NODE_TYPE
+import TokenInfo
 
 
 def generate_plot(
@@ -148,6 +149,8 @@ if __name__ == "__main__":
 
     # Read input JSON.
     inst = util.read_instance_from_file(args.jsonFile)
+
+    TokenInfo.update(inst['tokens'])
 
     # Get token prices (denominated in token specified).
     assert 'prices' in inst

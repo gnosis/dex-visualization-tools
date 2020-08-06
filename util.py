@@ -8,7 +8,7 @@ from typing import List, Dict, Tuple, Union
 from collections import OrderedDict
 from decimal import Decimal, ROUND_UP
 
-from TokenInfo import TOKEN_NAMES, TOKEN_DECIMALS
+from TokenInfo import TOKENS
 
 EDGE_TYPE = Tuple[str, str]
 NODE_TYPE = str
@@ -236,7 +236,7 @@ def get_token_name(token_ID: str) -> str:
 
     """
     # If not available, fall back to the token ID.
-    return TOKEN_NAMES.get(token_ID, token_ID)
+    return TOKENS.get(token_ID, {}).get('alias', token_ID)
 
 
 def get_token_ID(token_str: str) -> str:
@@ -250,9 +250,18 @@ def get_token_ID(token_str: str) -> str:
 
     """
     # If available, return token ID; otherwise fall back to input string.
-    if token_str in TOKEN_NAMES.values():
-        return list(TOKEN_NAMES.keys())[list(TOKEN_NAMES.values()).index(token_str)]
+    token_ids = [
+        tID for tID, token_info in TOKENS.items()
+        if isinstance(token_info, dict) and token_info.get('alias') == token_str
+    ]
+    if len(token_ids) == 0:
+        return token_str
+    elif len(token_ids) == 1:
+        return token_ids[0]
     else:
+        logging.warning(
+            f"Multiple tokens with the same alias [{token_str}]: {token_ids}"
+            f"(returning {token_str})")
         return token_str
 
 
@@ -267,7 +276,7 @@ def get_token_decimals(token_ID: str) -> Decimal:
 
     """
     # If not available, fall back to 18 decimals.
-    return Decimal(TOKEN_DECIMALS.get(token_ID, 18))
+    return Decimal(TOKENS.get(token_ID, {}).get('decimals', 18))
 
 
 def get_token_prices(prices: Dict[str, str]) -> Dict[str, Decimal]:

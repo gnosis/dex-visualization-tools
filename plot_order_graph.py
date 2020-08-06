@@ -15,6 +15,7 @@ from plot_utils import plot_network
 from contract_reader import ContractReader
 import util
 from util import EDGE_TYPE
+import TokenInfo
 
 # Set decimal precision.
 decimal.getcontext().prec = 100
@@ -112,6 +113,8 @@ if __name__ == "__main__":
         output_dir = './'
         contract_reader = ContractReader(args.network)
         inst = util.read_instance_from_blockchain(contract_reader)
+
+    TokenInfo.update(inst['tokens'])
 
     # Get number of orders per token pair.
     assert 'orders' in inst
