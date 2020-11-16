@@ -148,7 +148,7 @@ if __name__ == "__main__":
     output_dir = os.path.dirname(args.jsonFile)
 
     # Read input JSON.
-    inst = util.read_instance_from_file(args.jsonFile)
+    inst = util.read_instance_from_file(args.jsonFile, cap_orders_by_balances=False)
 
     TokenInfo.update(inst['tokens'])
 

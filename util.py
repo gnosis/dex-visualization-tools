@@ -161,7 +161,10 @@ def restrict_order_sell_amounts_by_balances(
     return orders_capped
 
 
-def read_instance_from_file(instance_file: str) -> Dict:
+def read_instance_from_file(
+    instance_file: str,
+    cap_orders_by_balances: bool = True
+) -> Dict:
     """Read data from instance JSON file.
 
     Args:
@@ -176,8 +179,9 @@ def read_instance_from_file(instance_file: str) -> Dict:
             inst = json.load(f, object_pairs_hook=OrderedDict)
 
         # Cap orders by the available account balance.
-        inst['orders'] = restrict_order_sell_amounts_by_balances(
-            inst['orders'], inst['accounts'])
+        if inst['accounts'] and cap_orders_by_balances:
+            inst['orders'] = restrict_order_sell_amounts_by_balances(
+                inst['orders'], inst['accounts'])
 
         # Read order data as decimal by default.
         inst['orders'] = _order_data_to_decimal(inst['orders'])
